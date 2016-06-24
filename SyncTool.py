@@ -99,7 +99,7 @@ class SyncTool(Tk):
                           {'text':'Sync', 'command':self.sync, 'side':'left'},
                           {'text':'Quit', 'command':self.exit, 'side':'right'}]
 
-
+"""
 ###################################
 # 同步功能
 ###################################
@@ -117,7 +117,7 @@ class SyncTool(Tk):
         sub_list(pth, result)
         return result
 
-    def compare(self):
+    def compare(self, pth_src, pth_des):
         file_new = []
         dir_new = []
         file_exist = []
@@ -196,6 +196,7 @@ class SyncTool(Tk):
                 if not data: break
                 des_file.write(data)
             self.txt.insert(END, 'Changed >>> %s\n' % pth_from)
+"""
 
     def AutoSync(self):
         self.compare()
