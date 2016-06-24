@@ -1,6 +1,6 @@
 # 主程序
 
-import time
+import threading
 import os
 import hashlib
 from tkinter import *
@@ -95,7 +95,6 @@ class SyncTool(Tk):
                            ('DiffFiles:', 0, 4),
                            ('Total:', 1, 0), ('Progress:', 1, 2)]
         self.menu_list = [{'text':'AutoSync', 'command':self.AutoSync, 'side':'left'},
-                          {'text':'ListDir', 'command':self.listdir, 'side':'left'},
                           {'text':'Compare', 'command':self.compare, 'side':'left'},
                           {'text':'Sync', 'command':self.sync, 'side':'left'},
                           {'text':'Quit', 'command':self.exit, 'side':'right'}]
@@ -105,9 +104,8 @@ class SyncTool(Tk):
 # 同步功能
 ###################################
 
-    def listdir(self, pth=[]):
+    def listdir(self, pth):
         result = []
-        pth = pth or self.pth_src
         def sub_list(pth, result):
             for item in os.listdir(pth):
                 real_pth = os.path.join(pth, item)
@@ -117,7 +115,6 @@ class SyncTool(Tk):
                 elif os.path.isfile(real_pth):
                     result.append(real_pth)
         sub_list(pth, result)
-        self.lbl_total.config(text=len(result))
         return result
 
     def compare(self):
@@ -140,8 +137,6 @@ class SyncTool(Tk):
         src_pth_list = [x.replace(src_pth, '') for x in self.listdir(src_pth)]
         des_pth_list = [x.replace(des_pth, '') for x in self.listdir(des_pth)]
 
-        self.lbl_total.config(text=len(src_pth_list))
-
         for item in src_pth_list:
             if item not in des_pth_list:
                 if os.path.isdir(os.path.join(src_pth, item)):
@@ -150,9 +145,6 @@ class SyncTool(Tk):
                     file_new.append(item)
             else:
                 file_exist.append(item)
-
-        self.lbl_files.config(text=len(file_new))
-        self.lbl_folders.config(text=len(dir_new))
 
         changed_list = []
         for item in file_exist:
@@ -173,7 +165,6 @@ class SyncTool(Tk):
                     changed_list.append(item)
                     break
 
-        self.lbl_diff.config(text=len(changed_list))
         self.sync_list = (dir_new, file_new, changed_list)
 
     def sync(self):
@@ -182,8 +173,7 @@ class SyncTool(Tk):
         for item in self.sync_list[0]:
             pth_to = os.path.join(self.pth_des, item)
             os.mkdir(pth_to)
-            self.txt.insert(END, 'Create Path => %s' % pth_to)
-            #print('Create Path => ', pth_to)
+            self.txt.insert(END, 'Create Path => %s\n' % pth_to)
 
         for item in self.sync_list[1]:
             pth_to = os.path.join(self.pth_des, item)
@@ -194,8 +184,7 @@ class SyncTool(Tk):
                 data = file_in.read(2048000)
                 if not data: break
                 file_out.write(data)
-            self.txt.insert(END, 'Creath File ==> %s' % pth_to)
-            #print('Creath File ==> ', pth_to)
+            self.txt.insert(END, 'Creath File ==> %s\n' % pth_to)
 
         for item in self.sync_list[2]:
             pth_from = os.path.join(self.pth_src, item)
@@ -206,13 +195,22 @@ class SyncTool(Tk):
                 data = src_file.read(10000000)
                 if not data: break
                 des_file.write(data)
-            self.txt.insert(END, 'Changed >>> %s' % pth_from)
-            print('Changed >>> ', pth_from)
+            self.txt.insert(END, 'Changed >>> %s\n' % pth_from)
 
     def AutoSync(self):
         self.compare()
         self.sync()
 
+        
+
 if __name__ == '__main__':
-    SyncTool()
+    class Test(SyncTool):
+        def selectSrc(self):
+            self.pth_src = '/Users/joshuapu/Documents/Scripts'
+            self.lbl_pth_src.config(text=self.pth_src)
+
+        def selectDest(self):
+            self.pth_des = '/Users/joshuapu/Documents/Backup'
+            self.lbl_pth_des.config(text=self.pth_des)
+    Test()
     mainloop()
