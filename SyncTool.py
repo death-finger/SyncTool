@@ -1,8 +1,7 @@
 # 主程序
 
 import threading
-import os
-import hashlib
+import SyncFunc
 from tkinter import *
 from tkinter.messagebox import askyesno
 from tkinter.filedialog import askdirectory
@@ -98,6 +97,16 @@ class SyncTool(Tk):
                           {'text':'Compare', 'command':self.compare, 'side':'left'},
                           {'text':'Sync', 'command':self.sync, 'side':'left'},
                           {'text':'Quit', 'command':self.exit, 'side':'right'}]
+
+    def compare(self):
+        self.sync_list = SyncFunc.compare(self.pth_src, self.pth_des)
+
+    def sync(self):
+        SyncFunc.sync(self.txt, self.sync_list, self.pth_src, self.pth_des)
+
+    def AutoSync(self):
+        pass
+
 
 """
 ###################################
@@ -197,10 +206,6 @@ class SyncTool(Tk):
                 des_file.write(data)
             self.txt.insert(END, 'Changed >>> %s\n' % pth_from)
 """
-
-    def AutoSync(self):
-        self.compare()
-        self.sync()
 
         
 

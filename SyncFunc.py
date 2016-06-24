@@ -3,6 +3,7 @@
 import os
 import hashlib
 from tkinter.messagebox import askyesno
+from tkinter import *
 
 
 def listdir(pth):
