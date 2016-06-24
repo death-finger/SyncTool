@@ -43,7 +43,7 @@ def compare(src_pth, des_pth):
                 file_new.append(item)
         else:
             file_exist.append(item)
-    return dir_new, file_new, file_exist
+    return src_pth, dir_new, file_new, file_exist
 
 
 def sync_new_files(dir_list, file_list, src_pth, des_pth):
