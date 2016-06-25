@@ -1,10 +1,11 @@
 # 主程序
 
-import threading
+import _thread
 import SyncFunc
 from tkinter import *
 from tkinter.messagebox import askyesno
 from tkinter.filedialog import askdirectory
+
 
 class SyncTool(Tk):
 
@@ -13,7 +14,7 @@ class SyncTool(Tk):
         self.start()
         self.lbl_pth_src, self.lbl_pth_des = self.makeLabel()
         self.lbl_files, self.lbl_folders, self.lbl_diff, \
-        self.lbl_total, self.lbl_prog = self.makeStatus()
+            self.lbl_total, self.lbl_prog = self.makeStatus()
         self.txt = self.makeText()
         self.makeMenu()
 
@@ -98,11 +99,26 @@ class SyncTool(Tk):
                           {'text':'Sync', 'command':self.sync, 'side':'left'},
                           {'text':'Quit', 'command':self.exit, 'side':'right'}]
 
+#    def compare(self):
+#        self.lbl_prog.config(text='N/A')
+#        self.sync_list = SyncFunc.compare(self.pth_src, self.pth_des,
+#                                          lbl_list={'NewFiles':self.lbl_files, 'NewFolders':self.lbl_folders,
+#                                                    'Diff':self.lbl_diff, 'Total':self.lbl_total})
+
     def compare(self):
-        self.sync_list = SyncFunc.compare(self.pth_src, self.pth_des)
+        self.lbl_prog.config(text='N/A')
+        self.sync_list, file_exist = \
+            SyncFunc.compare_new(self.pth_src, self.pth_des,
+                                 lbl_list={'NewFiles':self.lbl_files, 'NewFolders':self.lbl_folders,
+                                           'Total':self.lbl_total})
+
+        self.sync_list.append([])
+        _thread.start_new_thread(SyncFunc.compare_exist,
+                                 (file_exist, self.pth_src, self.pth_des, self.sync_list[2], self.lbl_diff))
 
     def sync(self):
-        SyncFunc.sync(self.txt, self.sync_list, self.pth_src, self.pth_des)
+        _thread.start_new_thread(SyncFunc.sync,
+                                 (self.txt, self.sync_list, self.pth_src, self.pth_des, self.lbl_prog))
 
     def AutoSync(self):
         pass
@@ -207,16 +223,15 @@ class SyncTool(Tk):
             self.txt.insert(END, 'Changed >>> %s\n' % pth_from)
 """
 
-        
-
 if __name__ == '__main__':
+    import sys
     class Test(SyncTool):
         def selectSrc(self):
-            self.pth_src = '/Users/joshuapu/Documents/Scripts'
+            self.pth_src = r'G:\BackupTest' if sys.platform == 'win32' else r'/Users/joshuapu/Documents/Scripts'
             self.lbl_pth_src.config(text=self.pth_src)
 
         def selectDest(self):
-            self.pth_des = '/Users/joshuapu/Documents/Backup'
+            self.pth_des = r'Y:\Backup' if sys.platform == 'win32' else r'/Users/joshuapu/Documents/Backup'
             self.lbl_pth_des.config(text=self.pth_des)
     Test()
     mainloop()
